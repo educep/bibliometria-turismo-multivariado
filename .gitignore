@@ -76,6 +76,9 @@ output/
 # Datos fuente (restricciones WoS)
 data/*.xlsx
 
+# Scripts locales
+deploy.sh
+
 # Documentos internos (no publicar)
 BITACORA.md
 **/preliminar/

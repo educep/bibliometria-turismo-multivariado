@@ -325,4 +325,4 @@ Si utilizas este trabajo en tu investigación, por favor cita:
 
 ---
 
-*Generado con [Quarto](https://quarto.org), Python y herramientas de código abierto.*
+*Generado con [Quarto](https://quarto.org), Python y herramientas de código abierto. El desarrollo fue asistido por inteligencia artificial ([Claude Code](https://claude.ai/claude-code)), en línea con los principios de transparencia y uso responsable de IA en la investigación.*

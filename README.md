@@ -77,12 +77,11 @@ pip install -e ".[dev]"
 ```
 GRAFOS/
 ├── README.md
-├── CLAUDE.md                             ← instrucciones para Claude Code
 ├── pyproject.toml
+├── requirements.txt
 ├── Makefile                              ← venv, install, format, lint, test
 ├── data/
-│   ├── anal multiv 331 artic completo.xlsx  ← datos fuente (WoS export)
-│   └── glosario_columnas_wos.txt            ← descripción de 70 columnas
+│   └── glosario_columnas_wos.txt         ← descripción de 70 columnas WoS
 ├── src/co_occurrence/                    ← paquete Python
 │   ├── config.py                         ← rutas y parámetros (Pydantic)
 │   ├── synonyms.py                       ← ~160 sinónimos + stoplist (~90 términos)
@@ -95,13 +94,17 @@ GRAFOS/
 │   ├── topics/                           ← LDA, BERTopic
 │   ├── viz/                              ← Plotly, PyVis, export GEXF/CSV
 │   └── obsidian.py                       ← generador de vault Obsidian
-├── output/                               ← GEXF, CSV generados por el pipeline
-├── docs/                                 ← documentación completa
-│   ├── BITACORA.md                       ← cuaderno de laboratorio (hallazgos, decisiones)
-│   ├── preliminar/                       ← documentos de diseño originales
-│   └── *.md                              ← API, arquitectura, CLI, metodología, resultados
+├── docs/                                 ← documentación técnica
+│   ├── index.md                          ← índice general
+│   ├── api.md                            ← referencia de funciones públicas
+│   ├── architecture.md                   ← módulos, flujo de datos
+│   ├── cli.md                            ← comandos CLI
+│   ├── configuration.md                  ← parámetros y sinónimos
+│   ├── installation.md                   ← prerrequisitos, dependencias
+│   ├── methodology.md                    ← fundamentos matemáticos
+│   └── results.md                        ← resultados del pipeline
 ├── quarto/                               ← páginas Quarto del sitio web
-│   ├── _quarto.yml                       ← configuración del sitio Quarto
+│   ├── _quarto.yml                       ← configuración del sitio
 │   ├── index.qmd                         ← página principal
 │   ├── 01_datos.qmd                      ← descripción del corpus
 │   ├── 02_coocurrencia.qmd               ← grafo de co-ocurrencia interactivo
@@ -110,9 +113,14 @@ GRAFOS/
 │   ├── 05_reduccion_dim.qmd              ← MDS, t-SNE, UMAP, CA (tabset)
 │   ├── 06_evolucion.qmd                  ← evolución temporal
 │   ├── about.qmd                         ← sobre el proyecto
+│   ├── coocurrence_pyvis.html            ← grafo interactivo PyVis
 │   └── styles.css                        ← estilos del sitio
-├── deploy.sh                             ← script de deploy a S3
-└── _site/                                ← output Quarto → S3 (generado)
+└── vault_bibliometria/                   ← vault Obsidian generado
+    ├── _INDEX.md                         ← índice con queries Dataview
+    ├── keywords/                         ← notas por keyword
+    ├── authors/                          ← notas por autor
+    ├── journals/                         ← notas por revista
+    └── communities/                      ← notas por comunidad
 ```
 
 ## Estado actual
@@ -163,3 +171,7 @@ GRAFOS/
 ## Autor
 
 **Eduardo Cepeda, Ph.D.** — [Sitio Web](https://cepeda.fr)
+
+---
+
+*Generado con [Quarto](https://quarto.org), Python y herramientas de código abierto. El desarrollo fue asistido por inteligencia artificial ([Claude Code](https://claude.ai/claude-code)), en línea con los principios de transparencia y uso responsable de IA en la investigación.*
