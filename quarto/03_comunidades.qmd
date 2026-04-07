@@ -14,20 +14,27 @@ Se usó el algoritmo **Louvain** sobre el grafo de co-ocurrencia bruto (sin norm
 from co_occurrence.io.loader import load_wos_data
 from co_occurrence.config import DATA_FILE
 from co_occurrence.graphs.cooccurrence import build_cooccurrence_graph
-from co_occurrence.analysis.communities import detect_louvain, label_communities
+import ast
 import pandas as pd
 from pathlib import Path
 
+OUTPUT = Path("../output")
+comm_df = pd.read_csv(OUTPUT / "communities_labeled.csv")
+
+# Reconstruir partition dict desde CSV (fuente de verdad)
 df = load_wos_data(DATA_FILE)
 G = build_cooccurrence_graph(df, column="Author Keywords", min_weight=1, min_frequency=2)
 
-partition = detect_louvain(G)
-community_labels = label_communities(G, partition, top_n=5)
+partition = {}
+for _, row in comm_df.iterrows():
+    kws = ast.literal_eval(row["keywords"]) if isinstance(row["keywords"], str) else []
+    for kw in kws:
+        if kw in G.nodes:
+            partition[kw] = row["community"]
 
-print(f"Comunidades detectadas: {len(community_labels)}")
-for cid, label in sorted(community_labels.items()):
-    size = sum(1 for v in partition.values() if v == cid)
-    print(f"  Comunidad {cid} ({size} nodos): {label}")
+print(f"Comunidades detectadas: {len(comm_df)}")
+for _, row in comm_df.iterrows():
+    print(f"  Comunidad {row['community']} ({row['size']} nodos): {row['label']}")
 ```
 
 ## Tabla de comunidades

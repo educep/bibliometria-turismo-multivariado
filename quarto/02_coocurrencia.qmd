@@ -73,6 +73,7 @@ Cada punto es una keyword; el color indica la comunidad Louvain.
 import pandas as pd
 from pathlib import Path
 from co_occurrence.viz.plotly_graphs import plot_network
+from co_occurrence.analysis.communities import label_communities
 
 OUTPUT = Path("../output")
 
@@ -81,10 +82,14 @@ coords = pd.read_csv(OUTPUT / "dimred_umap.csv")
 if "keyword" not in coords.columns and coords.columns[0] != "keyword":
     coords = coords.rename(columns={coords.columns[0]: "keyword"})
 
+comm_df = label_communities(G, partition, top_n=3)
+community_labels = dict(zip(comm_df["community"], comm_df["name"]))
+
 fig = plot_network(
     G,
     coords=coords,
     partition=partition,
+    community_labels=community_labels,
     title="Red de co-ocurrencia de keywords en turismo multivariado",
     min_degree_label=5,
     height=720,

@@ -32,7 +32,7 @@ website:
         text: Acerca de
     right:
       - icon: github
-        href: https://github.com/cepedaio
+        href: https://github.com/educep/bibliometria-turismo-multivariado
   page-footer:
     center: "2026 Eduardo Cepeda, Ph.D."
 

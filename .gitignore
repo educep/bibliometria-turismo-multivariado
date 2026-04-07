@@ -79,3 +79,4 @@ data/*.xlsx
 # Documentos internos (no publicar)
 BITACORA.md
 **/preliminar/
+docs/nice_to_do/

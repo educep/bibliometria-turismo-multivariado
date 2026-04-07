@@ -10,20 +10,30 @@ relaciona keywords con otras variables (como revistas o países).
 ```{python}
 #| label: setup-dimred
 
+import ast
 import pandas as pd
 from pathlib import Path
-from co_occurrence.io.loader import load_wos_data
-from co_occurrence.config import DATA_FILE
-from co_occurrence.graphs.cooccurrence import build_cooccurrence_graph
-from co_occurrence.analysis.communities import detect_louvain
 
 OUTPUT = Path("../output")
 
-df = load_wos_data(DATA_FILE)
-G = build_cooccurrence_graph(df, column="Author Keywords", min_weight=1, min_frequency=2)
-partition = detect_louvain(G)
+# Leer comunidades desde CSV (fuente de verdad) y crear partition con etiquetas
+comm_df = pd.read_csv(OUTPUT / "communities_labeled.csv")
 
-print("Grafo y partición listos para visualización.")
+# Etiqueta corta: primeras 3 keywords de la label
+def short_label(row):
+    parts = row["label"].split(" / ")
+    return " / ".join(parts[:3])
+
+label_map = {row["community"]: short_label(row) for _, row in comm_df.iterrows()}
+
+# partition: keyword → etiqueta corta de comunidad
+partition = {}
+for _, row in comm_df.iterrows():
+    kws = ast.literal_eval(row["keywords"]) if isinstance(row["keywords"], str) else []
+    for kw in kws:
+        partition[kw] = label_map[row["community"]]
+
+print("Partición con etiquetas lista para visualización.")
 ```
 
 ## Comparación de métodos

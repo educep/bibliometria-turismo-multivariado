@@ -66,7 +66,7 @@ def plot_degree_vs_betweenness(
 
 def plot_manifold_scatter(
     coords: pd.DataFrame,
-    partition: dict[str, int] | None = None,
+    partition: dict[str, int | str] | None = None,
     method: str = "UMAP",
     top_n_labels: int = 20,
     height: int = 700,
@@ -90,7 +90,7 @@ def plot_manifold_scatter(
     df = coords.copy()
 
     if partition:
-        df["community"] = df["keyword"].map(partition).fillna(-1).astype(int).astype(str)
+        df["community"] = df["keyword"].map(partition).fillna("sin comunidad").astype(str)
         color_col = "community"
         color_seq = None
     else:

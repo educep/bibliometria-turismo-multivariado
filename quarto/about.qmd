@@ -256,6 +256,58 @@ quarto render
 
 ---
 
+## Alcance y limitaciones
+
+Este estudio se centra en la **co-ocurrencia de palabras clave** (keywords) como unidad
+de análisis. Las redes presentadas en este sitio mapean la estructura temática y
+metodológica del campo a partir de las keywords que los autores asignan a sus artículos.
+Es importante señalar lo que este enfoque **sí cubre** y lo que **queda fuera**:
+
+### Lo que este estudio analiza
+
+- **Estructura temático-metodológica** — qué técnicas multivariadas se usan para qué
+  problemas turísticos, y cómo se agrupan en comunidades.
+- **Evolución temporal** — qué técnicas ganan o pierden protagonismo a lo largo del tiempo.
+- **Correspondencia keyword-revista** — qué circuitos de publicación se asocian a qué
+  tradiciones metodológicas (biplot CA).
+- **Keywords puente** — qué conceptos conectan subcampos que de otra manera no se tocarían.
+
+### Lo que este estudio no cubre
+
+- **Análisis geográfico** — ¿qué países publican más utilizando técnicas multivariadas
+  en turismo? ¿Hay diferencias regionales en la elección de métodos? El código del proyecto
+  incluye la capacidad de construir redes bipartitas país-keyword, pero este análisis
+  no se presenta aquí.
+- **Redes de co-autoría** — la colaboración entre investigadores no se analiza. El código
+  permite construir redes de co-autoría, pero el foco se mantuvo en la dimensión temática.
+- **Análisis de co-citación** — la base intelectual compartida (qué referencias se citan
+  juntas) queda fuera del alcance actual.
+- **Análisis institucional** — la distribución por universidades o centros de investigación
+  no se explora.
+- **Cobertura de bases de datos** — el corpus proviene exclusivamente de Web of Science
+  (Core Collection). Scopus, Google Scholar u otras bases podrían arrojar un panorama
+  distinto, especialmente para regiones con menor cobertura en WoS.
+- **Tamaño del corpus** — con 331 artículos, las técnicas menos frecuentes (deep learning,
+  fsQCA, text mining) aparecen con frecuencias muy bajas, lo que limita la robustez
+  del análisis para esos subcampos emergentes.
+
+### Extensiones posibles
+
+El paquete `co_occurrence` ya implementa las funciones necesarias para abordar varias
+de estas dimensiones (redes bipartitas país-keyword, co-autoría, co-citación). Además,
+se contempla incorporar:
+
+- **Topic modeling sobre abstracts** — El análisis actual se basa en keywords (3-5 palabras
+  declarativas por artículo). Los abstracts contienen ~200 palabras que describen el problema,
+  la metodología y los resultados. Técnicas como LDA o BERTopic podrían descubrir temas
+  latentes que las keywords no capturan, y las discrepancias entre topics y comunidades
+  de co-ocurrencia serían en sí mismas un hallazgo: temas que se practican pero no se
+  nombran, o comunidades de keywords que no reflejan un tema real.
+
+Estas extensiones podrían incorporarse en versiones futuras de este sitio.
+
+---
+
 ## Cita
 
 Si utilizas este trabajo en tu investigación, por favor cita:
