@@ -29,10 +29,17 @@ def plot_degree_vs_betweenness(
     """
     import plotly.express as px
 
-    color_col = "community" if "community" in centralities.columns else "frequency"
+    df = centralities.copy()
+    if "community" in df.columns:
+        df["community"] = df["community"].astype(str)
+        color_col = "community"
+        color_seq = None
+    else:
+        color_col = "frequency"
+        color_seq = "Viridis"
 
     fig = px.scatter(
-        centralities,
+        df,
         x="weighted_degree",
         y="betweenness",
         size="frequency",
@@ -45,7 +52,7 @@ def plot_degree_vs_betweenness(
             "betweenness": "Betweenness Centrality",
         },
         height=height,
-        color_continuous_scale="Viridis",
+        color_continuous_scale=color_seq,
     )
 
     # Líneas de cuadrante en medianas

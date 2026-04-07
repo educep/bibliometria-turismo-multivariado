@@ -38,7 +38,13 @@ El scatter plot separa las keywords en cuatro tipos:
 #| label: degree-betweenness
 #| fig-cap: "Scatter degree vs betweenness — keywords pilar y puente"
 
+import ast
 from co_occurrence.viz.plotly_scatter import plot_degree_vs_betweenness
+
+# Mapear IDs de comunidad a etiquetas cortas (keyword principal)
+comm_df = pd.read_csv(OUTPUT / "communities_labeled.csv")
+label_map = {row["community"]: row["label"].split(" / ")[0] for _, row in comm_df.iterrows()}
+cent["community"] = cent["community"].map(label_map).fillna("sin comunidad")
 
 fig = plot_degree_vs_betweenness(
     cent,
