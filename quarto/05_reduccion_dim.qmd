@@ -19,12 +19,8 @@ OUTPUT = Path("../output")
 # Leer comunidades desde CSV (fuente de verdad) y crear partition con etiquetas
 comm_df = pd.read_csv(OUTPUT / "communities_labeled.csv")
 
-# Etiqueta corta: primeras 3 keywords de la label
-def short_label(row):
-    parts = row["label"].split(" / ")
-    return " / ".join(parts[:3])
-
-label_map = {row["community"]: short_label(row) for _, row in comm_df.iterrows()}
+# Etiqueta corta: solo la keyword principal (la más frecuente)
+label_map = {row["community"]: row["label"].split(" / ")[0] for _, row in comm_df.iterrows()}
 
 # partition: keyword → etiqueta corta de comunidad
 partition = {}
