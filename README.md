@@ -43,9 +43,13 @@ Grafos de co-ocurrencia por ventana temporal para mostrar emergencia, consolidac
 
 ## Publicación
 
-Sitio web interactivo generado con [Quarto](https://quarto.org/) y desplegado en AWS S3 + CloudFront. Gráficos interactivos con Plotly (hover, zoom, filtros). Exploración complementaria en Obsidian.
+Sitio web interactivo generado con [Quarto](https://quarto.org/) y desplegado en AWS S3 + CloudFront con HTTPS.
 
-Plan detallado: [`plan_publicacion_quarto_s3.md`](docs/preliminar/plan_publicacion_quarto_s3.md)
+**Sitio web:** [bibliometria-turismo-multivariado.cepeda.fr](https://bibliometria-turismo-multivariado.cepeda.fr)
+
+**Vault Obsidian:** [`vault_bibliometria/`](https://github.com/educep/bibliometria-turismo-multivariado/tree/main/vault_bibliometria) — clonar el repo y abrir la carpeta como vault en Obsidian.
+
+Gráficos interactivos con Plotly (hover, zoom, filtros). Plan detallado: [`plan_publicacion_quarto_s3.md`](docs/preliminar/plan_publicacion_quarto_s3.md)
 
 ## Instalación
 
@@ -130,7 +134,7 @@ GRAFOS/
 - [x] Reducción dimensional CA/MCA (biplot keyword x revista)
 - [x] Visualizaciones interactivas adicionales (PyVis, grafos Plotly)
 - [x] Páginas Quarto (.qmd)
-- [ ] Deploy S3
+- [x] Deploy S3 + CloudFront (HTTPS en bibliometria-turismo-multivariado.cepeda.fr)
 - [ ] Topic modeling (LDA / BERTopic)
 
 ## Documentación

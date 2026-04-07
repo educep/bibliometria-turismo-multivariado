@@ -219,15 +219,22 @@ explorar la red bibliométrica de forma personal e interactiva. El vault contien
 - **Queries Dataview** — el INDEX incluye consultas dinámicas para filtrar keywords por
   comunidad, frecuencia mínima o centralidad.
 
-El vault se genera automáticamente con el comando:
+El vault generado por el autor está disponible directamente en:
+
+> [vault_bibliometria en GitHub](https://github.com/educep/bibliometria-turismo-multivariado/tree/main/vault_bibliometria)
+
+Para usarlo, basta clonar el repositorio y abrir la carpeta `vault_bibliometria/` como vault en Obsidian:
+
+```bash
+git clone https://github.com/educep/bibliometria-turismo-multivariado.git
+# Abrir Obsidian → Open folder as vault → vault_bibliometria/
+```
+
+Para regenerar el vault con parámetros personalizados:
 
 ```bash
 python -m co_occurrence obsidian
 ```
-
-y se deposita en `vault_bibliometria/`. Está disponible en el
-[repositorio GitHub](https://github.com/educep/bibliometria-turismo-multivariado)
-del proyecto.
 
 ---
 
