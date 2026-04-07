@@ -1,0 +1,269 @@
+---
+title: "Acerca de este proyecto"
+---
+
+## Los autores
+
+**Eduardo Cepeda, Ph.D.**
+Consultor en análisis cuantitativo y ciencia de datos. Especializado en bibliometría,
+modelado estadístico multivariado y análisis de redes aplicados al sector turístico.
+
+- Web: [cepeda.fr](https://cepeda.fr)
+
+**Yheni Farfán**
+Responsable de la extracción, depuración y construcción de la base de datos.
+Realizó la búsqueda sistemática en Web of Science, la selección de los 331 artículos
+y la limpieza y estructuración del corpus utilizado en este análisis.
+
+---
+
+## El proyecto
+
+Este sitio presenta los resultados de un análisis bibliométrico de **331 artículos** indexados
+en **Web of Science (WoS)** que aplican técnicas estadísticas multivariadas a la investigación
+turística.
+
+### Pregunta de investigación
+
+> ¿Cómo se estructura el uso de técnicas estadísticas multivariadas en la investigación
+> turística, y cómo ha evolucionado esa estructura?
+
+### Corpus
+
+- **Fuente:** Web of Science (Core Collection)
+- **Criterio de selección:** Artículos que aplican al menos una técnica estadística
+  multivariada en contexto turístico.
+- **Período cubierto:** 2000-2023 (aproximadamente)
+- **N artículos:** 331
+- **Disponibilidad:** Los datos fuente no se distribuyen públicamente por restricciones
+  de licencia de Web of Science. Están disponibles bajo petición al autor.
+
+---
+
+## Metodología
+
+### Principio general: co-ocurrencia
+
+La **co-ocurrencia** mide la frecuencia con la que dos palabras clave aparecen juntas
+en un mismo artículo. Si dos keywords co-ocurren repetidamente en múltiples artículos,
+se infiere una proximidad temática o metodológica entre ellas.
+
+Formalmente, para dos keywords $a$ y $b$, el peso de co-ocurrencia es:
+
+$$w(a, b) = |\{ d \in A \mid a \in d \text{ y } b \in d \}|$$
+
+donde $A$ es el conjunto de los 331 artículos del corpus. Con estos pesos se construye
+un **grafo** donde cada keyword es un nodo y cada arista tiene un peso proporcional al
+número de co-apariciones.
+
+### Pipeline analítico
+
+El análisis sigue seis etapas:
+
+#### 1. Carga y limpieza
+
+Lectura del archivo WoS (.xlsx, 331 filas, 72 columnas). Se normalizan nombres de
+columnas y se seleccionan los campos relevantes: Author Keywords, Keywords Plus,
+Authors, Cited References, Publication Year y Abstracts.
+
+#### 2. Preprocesamiento de keywords
+
+Esta etapa es crítica para la calidad del resultado. Incluye:
+
+- **Parseo de campos multi-valor** — Las keywords vienen separadas por `;` en WoS.
+- **Normalización con diccionario de sinónimos** — "SEM", "structural equation modeling"
+  y "structural equation modelling" son el mismo concepto y deben fusionarse en un solo
+  nodo. El diccionario cubre todas las variantes de la taxonomía de técnicas multivariadas.
+- **Complemento con Keywords Plus** — Muchos artículos no tienen Author Keywords.
+  Se complementan con Keywords Plus (generadas automáticamente por WoS) solo para
+  artículos sin keywords de autor, aumentando la cobertura sin introducir duplicación.
+- **Filtrado de ruido** — Se eliminan keywords geográficas ("ap vojvodina", "mekong delta")
+  y términos excesivamente genéricos que distorsionan la estructura del grafo.
+
+#### 3. Construcción del grafo de co-ocurrencia
+
+Dos keywords se conectan si aparecen en el mismo artículo. El peso de la arista es el
+número de co-apariciones. Se aplican dos filtros calibrados empíricamente:
+
+- `min_frequency=2`: cada keyword debe aparecer en al menos 2 artículos del corpus.
+  Esto elimina keywords únicas (ruido) sin perder conexiones válidas.
+- `min_weight=1`: se permiten co-ocurrencias de peso 1, que en un corpus de 331
+  artículos representan conexiones legítimas.
+
+Esta combinación produce un grafo de **124 nodos y 365 aristas**, un equilibrio entre
+cobertura y precisión. La alternativa clásica (`min_weight=2` sin filtro de frecuencia,
+como VOSviewer con umbral 5) producía solo 39 nodos — demasiado restrictivo para
+un corpus de este tamaño.
+
+#### 4. Detección de comunidades
+
+Se aplica el **algoritmo de Louvain** (Blondel et al., 2008), que maximiza la modularidad:
+
+$$Q = \frac{1}{2m} \sum_{ij} \left[ w_{ij} - \frac{k_i k_j}{2m} \right] \delta(c_i, c_j)$$
+
+donde $m$ es el peso total del grafo, $k_i$ el grado ponderado del nodo $i$, y $\delta$
+la función delta de Kronecker. El resultado son **8 comunidades** que corresponden a
+subcampos reconocibles: SEM/satisfacción, DEA/eficiencia, series temporales/demanda,
+cluster analysis/segmentación, entre otros.
+
+Cada comunidad se etiqueta automáticamente con sus keywords de mayor grado ponderado
+interno, más un conteo de nodos restantes (ej. "SEM / satisfaction / segmentation (+16 más)").
+
+::: {.callout-note}
+Louvain puede producir **comunidades residuales** — pequeños grupos de keywords
+periféricas sin relación temática real, agrupadas por descarte. Estas se reportan
+honestamente como "temas con baja representación" sin forzar una interpretación temática.
+:::
+
+#### 5. Centralidades
+
+Se calculan múltiples métricas de centralidad para cuantificar la importancia estructural
+de cada keyword:
+
+| Métrica | Qué mide | Interpretación bibliométrica |
+|---------|----------|------------------------------|
+| **Grado ponderado** | Intensidad total de co-ocurrencias | Keywords más conectadas (ej. "tourism") |
+| **Betweenness** | Posición de puente entre subcampos | Keywords que conectan tradiciones distintas |
+| **Eigenvector** | Conexión a nodos influyentes | Keywords en el núcleo del campo |
+| **PageRank** | Influencia con amortiguamiento | Similar a eigenvector, más robusta ante cliques |
+| **Restricción de Burt** | Posición de broker (agujeros estructurales) | Keywords nexo interdisciplinario |
+
+El **betweenness** es la métrica más informativa: identifica keywords que conectan
+subcampos que de otra manera no se tocarían. Por ejemplo, "satisfaction" puede actuar
+como puente entre la comunidad SEM y la de cluster analysis.
+
+#### 6. Reducción dimensional
+
+Las matrices de co-ocurrencia son de alta dimensión. Se proyectan en 2D con tres
+técnicas complementarias:
+
+- **MDS** (Escalamiento Multidimensional) — Preserva distancias globales.
+  Stress < 0.1 indica buen ajuste.
+- **t-SNE** — Preserva estructura local (vecindades próximas). Útil para identificar
+  clusters compactos, pero los ejes no tienen interpretación directa.
+- **UMAP** — Preserva estructura local y global. Más rápido y reproducible que t-SNE.
+  Método preferido para corpus de este tamaño.
+
+Las tres operan sobre la matriz de distancias derivada del **Association Strength**:
+
+$$AS(a, b) = \frac{w(a, b)}{f(a) \cdot f(b)}$$
+
+Además se aplica **Análisis de Correspondencias (CA)** sobre la tabla de contingencia
+keywords × revistas. El biplot resultante superpone keywords y revistas en un mismo
+espacio factorial, revelando qué revistas publican qué tipo de investigación.
+
+::: {.callout-important}
+El CA reveló un hallazgo central: el biplot separa claramente la investigación
+**causal/estructural** (SEM, satisfacción, lealtad → revistas de management y hospitalidad)
+de la investigación **predictiva/temporal** (series temporales, VAR, demanda turística →
+Annals of Tourism Research, Tourism Economics). Las dos grandes tradiciones metodológicas
+del turismo cuantitativo publican en circuitos de revistas distintos.
+:::
+
+### Normalización de pesos de aristas
+
+Los pesos crudos están influidos por la frecuencia marginal de las keywords. Se aplican
+cuatro medidas de asociación normalizadas según el uso:
+
+| Método | Fórmula | Uso |
+|--------|---------|-----|
+| Association Strength | $w(a,b) / (f(a) \cdot f(b))$ | Layout de grafos, matrices de distancia |
+| Jaccard | $w(a,b) / (f(a) + f(b) - w(a,b))$ | Detección de comunidades |
+| Coseno de Salton | $w(a,b) / \sqrt{f(a) \cdot f(b)}$ | Similitud temática |
+| Inclusion Index | $w(a,b) / \min(f(a), f(b))$ | Relaciones jerárquicas |
+
+### Nota sobre el corpus
+
+Con 331 artículos, este es un corpus de tamaño modesto. Algunas técnicas emergentes
+(deep learning, text mining, fsQCA) aparecen con frecuencias muy bajas — apenas 1-2
+artículos. Esto no es un error del pipeline sino un reflejo de la realidad del campo:
+la adopción de machine learning en la investigación turística va por detrás de otros
+dominios. Este desfase es en sí mismo un hallazgo relevante.
+
+---
+
+## Herramientas utilizadas
+
+| Herramienta | Versión | Uso |
+|-------------|---------|-----|
+| Python | 3.13 | Lenguaje principal |
+| networkx | >=3.0 | Construcción y análisis de grafos |
+| python-louvain | >=0.16 | Detección de comunidades Louvain |
+| plotly | >=5.0 | Visualización interactiva |
+| pyvis | >=0.3 | Grafos interactivos arrastrables |
+| scikit-learn | >=1.3 | MDS, t-SNE |
+| umap-learn | >=0.5 | UMAP |
+| prince | >=0.13 | Análisis de Correspondencias |
+| Quarto | >=1.4 | Publicación web |
+| itables | >=2.0 | Tablas interactivas |
+
+El paquete `co_occurrence` fue desarrollado específicamente para este proyecto como
+librería Python instalable (`pip install -e ".[all]"`).
+
+---
+
+## Exploración con Obsidian
+
+Además de este sitio web, el proyecto genera un **vault de Obsidian** que permite
+explorar la red bibliométrica de forma personal e interactiva. El vault contiene:
+
+- **Notas por keyword** — cada keyword del grafo es una nota con metadatos en YAML
+  frontmatter (frecuencia, grado, betweenness, comunidad) y wikilinks `[[keyword]]`
+  hacia las keywords co-ocurrentes.
+- **Notas por comunidad** — resumen temático de cada comunidad con la lista completa
+  de sus miembros y métricas agregadas.
+- **Notas por autor y revista** — conexiones entre investigadores, publicaciones y
+  los temas que trabajan.
+- **Graph view nativo** — al abrir el vault en Obsidian, el graph view muestra la red
+  de co-ocurrencia completa, navegable por arrastre y zoom.
+- **Queries Dataview** — el INDEX incluye consultas dinámicas para filtrar keywords por
+  comunidad, frecuencia mínima o centralidad.
+
+El vault se genera automáticamente con el comando:
+
+```bash
+python -m co_occurrence obsidian
+```
+
+y se deposita en `vault_bibliometria/`. Está disponible en el
+[repositorio GitHub](https://github.com/educep/bibliometria-turismo-multivariado)
+del proyecto.
+
+---
+
+## Código fuente
+
+El código fuente completo del análisis está disponible en:
+
+> [github.com/educep/bibliometria-turismo-multivariado](https://github.com/educep/bibliometria-turismo-multivariado)
+
+---
+
+## Reproducibilidad
+
+Para reproducir el análisis completo:
+
+```bash
+# Instalar el paquete
+pip install -e ".[all]"
+
+# Ejecutar el pipeline completo
+python -m co_occurrence pipeline
+
+# Renderizar el sitio
+quarto render
+```
+
+---
+
+## Cita
+
+Si utilizas este trabajo en tu investigación, por favor cita:
+
+> Cepeda, E. y Farfán, Y. (2026). *Análisis bibliométrico de técnicas multivariadas en turismo:
+> co-ocurrencia, comunidades y evolución temporal*.
+> [URL del sitio]
+
+---
+
+*Generado con [Quarto](https://quarto.org), Python y herramientas de código abierto.*

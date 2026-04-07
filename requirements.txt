@@ -1,0 +1,4 @@
+# All dependencies are in pyproject.toml.
+# Install the project (runtime only):  pip install -e .
+# Install with dev tools (lint, test):  pip install -e ".[dev]"   or:  make install
+-e .

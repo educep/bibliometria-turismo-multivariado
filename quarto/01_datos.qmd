@@ -1,0 +1,154 @@
+---
+title: "Descripción del corpus"
+---
+
+Este capítulo describe las 331 publicaciones que forman la base del análisis bibliométrico.
+Los artículos fueron descargados de Web of Science (WoS) y corresponden a trabajos que aplican
+al menos una técnica estadística multivariada en el contexto de la investigación turística.
+
+## Carga de datos
+
+```{python}
+#| label: load-data
+
+from co_occurrence.io.loader import load_wos_data
+from co_occurrence.config import DATA_FILE
+
+df = load_wos_data(DATA_FILE)
+
+print(f"Artículos cargados  : {len(df)}")
+print(f"Columnas disponibles: {df.shape[1]}")
+print(f"Rango de años       : {int(df['Publication Year'].min())} - {int(df['Publication Year'].max())}")
+```
+
+## Distribución temporal
+
+```{python}
+#| label: year-distribution
+#| fig-cap: "Número de artículos publicados por año"
+
+import plotly.express as px
+
+year_counts = (
+    df["Publication Year"]
+    .dropna()
+    .astype(int)
+    .value_counts()
+    .sort_index()
+    .reset_index()
+)
+year_counts.columns = ["Año", "Artículos"]
+
+fig = px.bar(
+    year_counts,
+    x="Año",
+    y="Artículos",
+    title="Distribución temporal del corpus (331 artículos WoS)",
+    labels={"Año": "Año de publicación", "Artículos": "N artículos"},
+    text="Artículos",
+    height=420,
+)
+fig.update_traces(marker_color="#1f77b4", textposition="outside")
+fig.update_layout(xaxis={"dtick": 1})
+fig.show()
+```
+
+## Top 10 revistas
+
+```{python}
+#| label: top-journals
+#| fig-cap: "Revistas con mayor número de artículos en el corpus"
+
+import pandas as pd
+
+journal_col = "Source Title" if "Source Title" in df.columns else "Journal"
+
+if journal_col in df.columns:
+    top_journals = (
+        df[journal_col]
+        .dropna()
+        .value_counts()
+        .head(10)
+        .reset_index()
+    )
+    top_journals.columns = ["Revista", "Artículos"]
+
+    fig2 = px.bar(
+        top_journals,
+        x="Artículos",
+        y="Revista",
+        orientation="h",
+        title="Top 10 revistas por número de artículos",
+        labels={"Artículos": "N artículos", "Revista": ""},
+        text="Artículos",
+        height=420,
+    )
+    fig2.update_layout(yaxis={"categoryorder": "total ascending"})
+    fig2.update_traces(marker_color="#ff7f0e", textposition="outside")
+    fig2.show()
+else:
+    print("Columna de revista no encontrada. Columnas disponibles:", list(df.columns[:10]))
+```
+
+## Tabla interactiva de revistas
+
+```{python}
+#| label: journals-table
+
+try:
+    from itables import show
+
+    if journal_col in df.columns:
+        journals_full = (
+            df[journal_col]
+            .dropna()
+            .value_counts()
+            .reset_index()
+        )
+        journals_full.columns = ["Revista", "Artículos"]
+        show(
+            journals_full,
+            caption="Revistas en el corpus (todas)",
+            lengthMenu=[10, 25, 50],
+            scrollY="400px",
+        )
+except ImportError:
+    print("itables no disponible. Instalar con: pip install itables")
+    if journal_col in df.columns:
+        display(
+            df[journal_col]
+            .dropna()
+            .value_counts()
+            .head(20)
+            .to_frame("Artículos")
+        )
+```
+
+## Cobertura de keywords
+
+```{python}
+#| label: keyword-coverage
+
+ak_col = "Author Keywords"
+kp_col = "Keywords Plus"
+
+has_ak = df[ak_col].notna().sum() if ak_col in df.columns else 0
+has_kp = df[kp_col].notna().sum() if kp_col in df.columns else 0
+has_both = (
+    (df[ak_col].notna() & df[kp_col].notna()).sum()
+    if ak_col in df.columns and kp_col in df.columns
+    else 0
+)
+has_none = len(df) - (df[ak_col].notna() | df[kp_col].notna()).sum() if ak_col in df.columns and kp_col in df.columns else "N/A"
+
+print(f"Artículos con Author Keywords  : {has_ak} ({100*has_ak/len(df):.1f}%)")
+print(f"Artículos con Keywords Plus    : {has_kp} ({100*has_kp/len(df):.1f}%)")
+print(f"Artículos con ambas            : {has_both} ({100*has_both/len(df):.1f}%)")
+print(f"Artículos sin ninguna          : {has_none}")
+```
+
+::: {.callout-note}
+La estrategia de preprocesamiento usa **Author Keywords** como fuente primaria y complementa
+con **Keywords Plus** únicamente para los artículos que carecen de keywords de autor.
+Esto maximiza la cobertura sin duplicar información.
+:::

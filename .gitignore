@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.whl
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# mypy / type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Quarto (generated site)
+_site/
+.quarto/
+_freeze/
+
+# PyVis generated JS libs
+lib/
+
+# AI tools
+.claude/
+CLAUDE.md
+.cursorrules
+.cursor/
+.aider*
+.copilot/
+.github/copilot*
+.codeium/
+.continue/
+.windsurf/
+.bolt/
+
+# Project outputs (regenerable)
+output/
+
+/.quarto/
+**/*.quarto_ipynb
+# Datos fuente (restricciones WoS)
+data/*.xlsx
+
+# Documentos internos (no publicar)
+BITACORA.md
+**/preliminar/

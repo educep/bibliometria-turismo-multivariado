@@ -1,0 +1,152 @@
+---
+title: "Comunidades temáticas"
+---
+
+La detección de comunidades identifica grupos de keywords que co-ocurren entre sí más de
+lo esperado por azar. Cada comunidad representa un subcampo temático o metodológico coherente.
+Se usó el algoritmo **Louvain** sobre el grafo de co-ocurrencia bruto (sin normalización de pesos).
+
+## Detección de comunidades
+
+```{python}
+#| label: detect-communities
+
+from co_occurrence.io.loader import load_wos_data
+from co_occurrence.config import DATA_FILE
+from co_occurrence.graphs.cooccurrence import build_cooccurrence_graph
+from co_occurrence.analysis.communities import detect_louvain, label_communities
+import pandas as pd
+from pathlib import Path
+
+df = load_wos_data(DATA_FILE)
+G = build_cooccurrence_graph(df, column="Author Keywords", min_weight=1, min_frequency=2)
+
+partition = detect_louvain(G)
+community_labels = label_communities(G, partition, top_n=5)
+
+print(f"Comunidades detectadas: {len(community_labels)}")
+for cid, label in sorted(community_labels.items()):
+    size = sum(1 for v in partition.values() if v == cid)
+    print(f"  Comunidad {cid} ({size} nodos): {label}")
+```
+
+## Tabla de comunidades
+
+```{python}
+#| label: communities-table
+
+OUTPUT = Path("../output")
+comm_df = pd.read_csv(OUTPUT / "communities_labeled.csv")
+
+# Parse keywords list stored as string
+import ast
+
+comm_df["n_keywords"] = comm_df["keywords"].apply(
+    lambda x: len(ast.literal_eval(x)) if isinstance(x, str) else 0
+)
+
+display_df = comm_df[["community", "label", "n_keywords"]].copy()
+display_df.columns = ["ID", "Etiqueta", "N Keywords"]
+
+try:
+    from itables import show
+    show(
+        display_df,
+        caption="Comunidades temáticas detectadas por Louvain",
+        lengthMenu=[10, 20],
+    )
+except ImportError:
+    display(display_df)
+```
+
+## Tamaño de comunidades (treemap)
+
+```{python}
+#| label: treemap-communities
+#| fig-cap: "Distribución del tamaño de las comunidades Louvain"
+
+import plotly.express as px
+import ast
+
+# Rebuild a flat dataframe: one row per keyword
+rows = []
+for _, row in comm_df.iterrows():
+    kws = ast.literal_eval(row["keywords"]) if isinstance(row["keywords"], str) else []
+    for kw in kws:
+        rows.append({"community": str(row["community"]), "label": row["label"], "keyword": kw})
+
+flat_df = pd.DataFrame(rows)
+
+fig = px.treemap(
+    flat_df,
+    path=["label", "keyword"],
+    title="Comunidades temáticas — tamaño proporcional al número de keywords",
+    height=600,
+)
+fig.update_traces(textinfo="label+value")
+fig.show()
+```
+
+## Interpretación de comunidades
+
+::: {.callout-note title="Comunidad 0 — Segmentación y demanda turística"}
+Agrupa técnicas de segmentación (cluster analysis, self-organizing maps) junto con keywords
+de demanda turística y turismo sostenible. Representa el subcampo de segmentación de mercados
+y gestión de destinos.
+:::
+
+::: {.callout-note title="Comunidad 1 — Econometría del turismo"}
+Concentra keywords de series temporales y econometría (Granger causality, VAR, panel data,
+economic growth). Es el subcampo de modelización económica del turismo con técnicas de
+series temporales multivariadas.
+:::
+
+::: {.callout-note title="Comunidad 2 — Análisis multivariado clásico"}
+El grupo más amplio: cluster analysis, multivariate analysis, competitiveness, logistic
+regression. Corresponde al uso clásico de técnicas multivariadas descriptivas e inferenciales
+en estudios de destinos y competitividad.
+:::
+
+::: {.callout-note title="Comunidad 3 — Métodos cualitativos comparativos"}
+Reúne fsQCA, discriminant analysis, DEA y PLS. Es un subcampo metodológico heterogéneo
+que agrupa técnicas de comparación y clasificación menos frecuentes en el corpus.
+:::
+
+::: {.callout-note title="Comunidad 4 — Regresión y análisis multivariado aplicado"}
+Multiple regression, PCA, hospitality, hotels, social media. Representa la aplicación de
+técnicas de reducción dimensional y regresión al sector hotelero y la gestión de la reputación online.
+:::
+
+::: {.callout-note title="Comunidad 5 — Indicadores ambientales y de consumo"}
+Consumer behavior, environmental management, conservation. Subcampo menor centrado en
+indicadores de gestión ambiental con técnicas multivariadas.
+:::
+
+::: {.callout-note title="Comunidad 6 — SEM y comportamiento del turista"}
+structural equation modeling, satisfaction, motivation, destination image, loyalty. El
+subcampo más cohesionado: SEM/PLS aplicado al comportamiento del turista y la imagen de destino.
+:::
+
+::: {.callout-note title="Comunidad 7 — COVID-19, sostenibilidad y comportamiento reciente"}
+covid-19, sustainability, behavioral intention, ecotourism, medical tourism. Agrupa la
+producción reciente post-2020 que combina sostenibilidad con técnicas de análisis de
+comportamiento (SEM, correspondence analysis).
+:::
+
+## Modularidad
+
+```{python}
+#| label: modularity
+
+import networkx.algorithms.community as nx_comm
+
+# Convert partition dict to list of sets for networkx
+community_sets = {}
+for node, cid in partition.items():
+    community_sets.setdefault(cid, set()).add(node)
+
+communities_list = list(community_sets.values())
+modularity = nx_comm.modularity(G, communities_list)
+print(f"Modularidad Q = {modularity:.4f}")
+print("(Q > 0.3 indica estructura de comunidades significativa)")
+```

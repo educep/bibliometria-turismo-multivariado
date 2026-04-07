@@ -1,0 +1,198 @@
+{
+  "main": {
+    "id": "0a186ad3423f122a",
+    "type": "split",
+    "children": [
+      {
+        "id": "0d03fe5d92c2bb59",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b33b90a5f29e3cdb",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "3637e609fddb1c0d",
+    "type": "split",
+    "children": [
+      {
+        "id": "04303b1465ea5754",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1d428049a8464c13",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "b8ad4bc70be86b60",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "5232f3d95d835120",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "cd18b3c6945244ba",
+    "type": "split",
+    "children": [
+      {
+        "id": "8e9587febca00c00",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2de48d482704dd81",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "05b3428c88b2b157",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "010ba84c097fca65",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "fcff6c6c7a18d811",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "2cf23b5564b57fdc",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "b33b90a5f29e3cdb",
+  "lastOpenFiles": [
+    "authors/Chmiel, MJ.md",
+    "authors/Abrantes, JL.md",
+    "authors/Aballéa, S.md",
+    "authors/Kaura, P.md",
+    "keywords/multivariate analysis.md",
+    "communities/Multivariate Analysis & Clustering.md",
+    "communities/QCA & Methodological Diversity.md",
+    "communities/Macroeconomics & Causality.md",
+    "communities/COVID-19, Sustainability & Intentions.md",
+    "_INDEX.md",
+    "communities/Comunidad 0.md",
+    "communities/SEM & Behavioral Models.md",
+    "communities/Regression, PCA & Scaling.md",
+    "communities/Time Series & Forecasting.md",
+    "journals/1ST UPI INTERNATIONAL GEOGRAPHY SEMINAR 2017.md",
+    "keywords/airbnb.md"
+  ]
+}

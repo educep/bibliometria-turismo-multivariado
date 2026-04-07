@@ -1,0 +1,153 @@
+---
+title: "Centralidades y keywords clave"
+---
+
+Las métricas de centralidad identifican las keywords más importantes en la red según distintos
+criterios. Un keyword puede ser central porque es muy frecuente (degree), porque conecta
+subcampos distintos (betweenness) o porque está rodeado de keywords importantes (eigenvector).
+
+## Carga de datos
+
+```{python}
+#| label: load-centralities
+
+import pandas as pd
+from pathlib import Path
+
+OUTPUT = Path("../output")
+
+cent = pd.read_csv(OUTPUT / "centralities.csv")
+holes = pd.read_csv(OUTPUT / "structural_holes.csv")
+
+print(f"Keywords con centralidades: {len(cent)}")
+print(f"Keywords con agujeros estructurales: {len(holes)}")
+print(f"\nColumnas centralidades: {list(cent.columns)}")
+print(f"Columnas agujeros     : {list(holes.columns)}")
+```
+
+## Degree vs Betweenness
+
+El scatter plot separa las keywords en cuatro tipos:
+
+- **Alto degree + alto betweenness** → pilares del campo (conectan muchos temas)
+- **Alto betweenness + bajo degree** → puentes interdisciplinarios (conectores especializados)
+- **Alto degree + bajo betweenness** → núcleos de comunidad (muy conectados dentro de su grupo)
+- **Bajo en ambos** → keywords periféricas
+
+```{python}
+#| label: degree-betweenness
+#| fig-cap: "Scatter degree vs betweenness — keywords pilar y puente"
+
+from co_occurrence.viz.plotly_scatter import plot_degree_vs_betweenness
+
+fig = plot_degree_vs_betweenness(
+    cent,
+    title="Degree vs Betweenness Centrality — keywords del corpus turístico",
+    height=620,
+)
+fig.show()
+```
+
+## Top 20 por cada métrica
+
+```{python}
+#| label: top-by-metric
+
+import plotly.express as px
+
+metrics = {
+    "frequency": "Frecuencia (apariciones)",
+    "weighted_degree": "Degree ponderado",
+    "betweenness": "Betweenness centrality",
+    "eigenvector": "Eigenvector centrality",
+    "pagerank": "PageRank",
+}
+
+for col, label in metrics.items():
+    if col not in cent.columns:
+        continue
+    top = cent.nlargest(15, col)[["keyword", col, "community"]].copy()
+    top["community"] = top["community"].astype(str)
+    fig = px.bar(
+        top,
+        x=col,
+        y="keyword",
+        orientation="h",
+        color="community",
+        title=f"Top 15 keywords — {label}",
+        labels={col: label, "keyword": "", "community": "Comunidad"},
+        height=420,
+    )
+    fig.update_layout(yaxis={"categoryorder": "total ascending"}, showlegend=False)
+    fig.show()
+```
+
+## Tabla interactiva de centralidades
+
+```{python}
+#| label: centralities-table
+
+display_cent = cent[[c for c in ["keyword", "frequency", "degree", "weighted_degree",
+                                  "betweenness", "eigenvector", "pagerank", "community"]
+                      if c in cent.columns]].copy()
+
+for col in ["betweenness", "eigenvector", "pagerank"]:
+    if col in display_cent.columns:
+        display_cent[col] = display_cent[col].round(4)
+
+try:
+    from itables import show
+    show(
+        display_cent,
+        caption="Centralidades de todas las keywords",
+        lengthMenu=[10, 25, 50],
+        scrollY="450px",
+        order=[[2, "desc"]],
+    )
+except ImportError:
+    display(display_cent.head(30))
+```
+
+## Agujeros estructurales (Structural Holes)
+
+Los agujeros estructurales (Burt, 1992) identifican keywords que conectan clusters que
+de otro modo no estarían conectados. Un **constraint bajo** indica que el keyword
+ocupa una posición de intermediación estratégica (mucha autonomía estructural).
+
+```{python}
+#| label: structural-holes
+#| fig-cap: "Agujeros estructurales — constraint vs effective size"
+
+import plotly.express as px
+
+if "constraint" in holes.columns and "effective_size" in holes.columns:
+    top_holes = holes.nsmallest(40, "constraint")
+
+    fig = px.scatter(
+        top_holes,
+        x="constraint",
+        y="effective_size",
+        text="keyword",
+        title="Agujeros estructurales: constraint vs effective size (top 40 con menor constraint)",
+        labels={
+            "constraint": "Constraint de Burt (menor = más autonomía)",
+            "effective_size": "Tamaño efectivo de la red egocéntrica",
+        },
+        height=550,
+    )
+    fig.update_traces(textposition="top center", marker_size=8, marker_color="#9467bd")
+    fig.show()
+else:
+    print("Columnas 'constraint' o 'effective_size' no encontradas en structural_holes.csv")
+    print("Columnas disponibles:", list(holes.columns))
+```
+
+::: {.callout-tip title="Interpretación de centralidades"}
+**Keywords pilar** (alto degree + alta frecuencia): son los temas centrales del corpus —
+"tourism", "multivariate analysis", "satisfaction". Su eliminación fragmentaría la red.
+
+**Keywords puente** (alto betweenness, bajo degree): conectan subcampos con pocos enlaces
+directos. Son candidatas a ser temas transversales o emergentes que integran metodologías
+distintas. Ejemplo esperado: "social media" conectando el cluster de reputación online
+con el cluster de comportamiento del turista.
+:::

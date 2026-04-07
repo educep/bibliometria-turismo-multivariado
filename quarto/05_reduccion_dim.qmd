@@ -1,0 +1,141 @@
+---
+title: "Reducción dimensional"
+---
+
+La reducción dimensional permite visualizar la estructura del espacio de keywords en 2D.
+Cada método revela distintos aspectos: MDS preserva distancias globales, t-SNE muestra
+agrupamientos locales, UMAP equilibra ambos, y el Análisis de Correspondencias (CA)
+relaciona keywords con otras variables (como revistas o países).
+
+```{python}
+#| label: setup-dimred
+
+import pandas as pd
+from pathlib import Path
+from co_occurrence.io.loader import load_wos_data
+from co_occurrence.config import DATA_FILE
+from co_occurrence.graphs.cooccurrence import build_cooccurrence_graph
+from co_occurrence.analysis.communities import detect_louvain
+
+OUTPUT = Path("../output")
+
+df = load_wos_data(DATA_FILE)
+G = build_cooccurrence_graph(df, column="Author Keywords", min_weight=1, min_frequency=2)
+partition = detect_louvain(G)
+
+print("Grafo y partición listos para visualización.")
+```
+
+## Comparación de métodos
+
+::: {.panel-tabset}
+
+### UMAP
+
+UMAP (Uniform Manifold Approximation and Projection) preserva tanto la estructura local
+como la global del espacio de keywords. Es el método recomendado para layout de grafos
+bibliométricos porque produce agrupamientos visualmente interpretables.
+
+```{python}
+#| label: umap-scatter
+#| fig-cap: "Proyección UMAP — colores por comunidad Louvain"
+
+from co_occurrence.viz.plotly_scatter import plot_manifold_scatter
+
+coords_umap = pd.read_csv(OUTPUT / "dimred_umap.csv")
+
+fig_umap = plot_manifold_scatter(
+    coords_umap,
+    partition=partition,
+    method="UMAP",
+    height=640,
+)
+fig_umap.show()
+```
+
+### MDS
+
+El Escalado Multidimensional (MDS) minimiza la diferencia entre las distancias en el
+espacio original y las distancias en 2D. Los keywords que co-ocurren mucho aparecen
+juntos; los que nunca co-ocurren quedan alejados.
+
+```{python}
+#| label: mds-scatter
+#| fig-cap: "Proyección MDS — colores por comunidad Louvain"
+
+coords_mds = pd.read_csv(OUTPUT / "dimred_mds.csv")
+
+fig_mds = plot_manifold_scatter(
+    coords_mds,
+    partition=partition,
+    method="MDS",
+    height=640,
+)
+fig_mds.show()
+```
+
+### t-SNE
+
+t-SNE (t-distributed Stochastic Neighbor Embedding) es excelente para revelar
+agrupamientos locales. La distancia global entre clusters NO es interpretable
+directamente, pero la cohesión interna de cada grupo sí lo es.
+
+```{python}
+#| label: tsne-scatter
+#| fig-cap: "Proyección t-SNE — colores por comunidad Louvain"
+
+coords_tsne = pd.read_csv(OUTPUT / "dimred_tsne.csv")
+
+fig_tsne = plot_manifold_scatter(
+    coords_tsne,
+    partition=partition,
+    method="t-SNE",
+    height=640,
+)
+fig_tsne.show()
+```
+
+### Análisis de Correspondencias
+
+El Análisis de Correspondencias (CA) es un método de reducción para datos de frecuencia
+(tablas de contingencia). El biplot muestra simultáneamente las keywords (filas) y las
+revistas u otras variables (columnas), permitiendo identificar asociaciones entre ellas.
+
+```{python}
+#| label: ca-biplot
+#| fig-cap: "Biplot de Análisis de Correspondencias — keywords y variables contextuales"
+
+from co_occurrence.viz.plotly_scatter import plot_ca_biplot
+
+try:
+    row_coords = pd.read_csv(OUTPUT / "ca_row_coords.csv", index_col=0)
+    col_coords = pd.read_csv(OUTPUT / "ca_col_coords.csv", index_col=0)
+
+    fig_ca = plot_ca_biplot(
+        row_coords=row_coords,
+        col_coords=col_coords,
+        title="Análisis de Correspondencias — keywords del corpus turístico",
+        height=680,
+    )
+    fig_ca.show()
+except Exception as e:
+    print(f"Error al cargar coordenadas CA: {e}")
+    print("Verifica que output/ca_row_coords.csv y output/ca_col_coords.csv existen.")
+```
+
+:::
+
+## Comparación de métodos
+
+| Método | Preserva distancias globales | Preserva agrupamientos locales | Interpretación de distancias | Uso recomendado |
+|--------|:---:|:---:|:---:|---------|
+| MDS    | Sí  | Parcial | Sí | Layout general, presentaciones |
+| t-SNE  | No  | Sí      | No | Exploración de clusters |
+| UMAP   | Parcial | Sí  | Parcial | Layout de grafos, publicaciones |
+| CA     | N/A | N/A     | Sí (entre filas y columnas) | Relación keyword-revista |
+
+::: {.callout-note}
+Todos los métodos usan como entrada la **matriz de co-ocurrencia normalizada** (Association
+Strength) entre las keywords del corpus. Las coordenadas se precalculan en el pipeline
+y se guardan en `output/dimred_*.csv`.
+:::

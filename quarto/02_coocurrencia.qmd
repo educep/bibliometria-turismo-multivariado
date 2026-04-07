@@ -1,0 +1,131 @@
+---
+title: "Red de co-ocurrencia de keywords"
+---
+
+La red de co-ocurrencia conecta dos keywords cuando aparecen juntas en el mismo artículo.
+El peso de la arista refleja cuántas veces ocurre esa co-aparición. Los nodos más grandes
+son las keywords más frecuentes; los colores indican la comunidad temática a la que pertenecen.
+
+## Construcción del grafo
+
+```{python}
+#| label: build-graph
+
+from co_occurrence.io.loader import load_wos_data
+from co_occurrence.config import DATA_FILE
+from co_occurrence.graphs.cooccurrence import build_cooccurrence_graph
+from co_occurrence.analysis.communities import detect_louvain
+
+import networkx as nx
+
+df = load_wos_data(DATA_FILE)
+
+G = build_cooccurrence_graph(
+    df,
+    column="Author Keywords",
+    min_weight=1,
+    min_frequency=2,
+)
+
+partition = detect_louvain(G)
+
+print(f"Nodos  : {G.number_of_nodes()}")
+print(f"Aristas: {G.number_of_edges()}")
+print(f"Densidad      : {nx.density(G):.4f}")
+print(f"Componentes   : {nx.number_connected_components(G)}")
+print(f"Comunidades   : {len(set(partition.values()))}")
+```
+
+## Estadísticas de red
+
+```{python}
+#| label: network-stats
+
+import pandas as pd
+
+degrees = dict(G.degree())
+deg_series = pd.Series(degrees)
+
+print(f"Grado promedio     : {deg_series.mean():.2f}")
+print(f"Grado máximo       : {deg_series.max()} ({deg_series.idxmax()})")
+print(f"Grado mediano      : {deg_series.median():.1f}")
+
+# Largest connected component diameter (approximate)
+lcc = G.subgraph(max(nx.connected_components(G), key=len)).copy()
+print(f"Nodos en componente principal: {lcc.number_of_nodes()}")
+# Diameter can be slow for large graphs; use a sample
+if lcc.number_of_nodes() < 200:
+    diam = nx.diameter(lcc)
+    print(f"Diámetro del componente principal: {diam}")
+else:
+    print("Diámetro: grafo demasiado grande para cálculo exacto (usar aproximación)")
+```
+
+## Grafo interactivo (Plotly)
+
+Las coordenadas provienen de la proyección UMAP calculada sobre la matriz de co-ocurrencia.
+Cada punto es una keyword; el color indica la comunidad Louvain.
+
+```{python}
+#| label: network-plotly
+#| fig-cap: "Red de co-ocurrencia de keywords — coordenadas UMAP, colores por comunidad Louvain"
+
+import pandas as pd
+from pathlib import Path
+from co_occurrence.viz.plotly_graphs import plot_network
+
+OUTPUT = Path("../output")
+
+coords = pd.read_csv(OUTPUT / "dimred_umap.csv")
+# coords must have columns: keyword, x, y
+if "keyword" not in coords.columns and coords.columns[0] != "keyword":
+    coords = coords.rename(columns={coords.columns[0]: "keyword"})
+
+fig = plot_network(
+    G,
+    coords=coords,
+    partition=partition,
+    title="Red de co-ocurrencia de keywords en turismo multivariado",
+    min_degree_label=5,
+    height=720,
+)
+fig.show()
+```
+
+## Grafo interactivo (PyVis)
+
+La versión PyVis permite arrastrar nodos y explorar la red de forma más libre.
+
+```{python}
+#| label: network-pyvis
+#| echo: true
+
+from pathlib import Path
+import shutil
+from co_occurrence.viz.pyvis_net import export_pyvis
+
+# Generar en el directorio actual (junto al .qmd) para que Quarto lo copie al _site/
+pyvis_path = Path("coocurrence_pyvis.html")
+export_pyvis(G, output_path=pyvis_path, partition=partition, height="640px")
+
+# También guardar en output/ para uso fuera de Quarto
+output_copy = Path("../output") / "coocurrence_pyvis.html"
+output_copy.parent.mkdir(parents=True, exist_ok=True)
+shutil.copy2(pyvis_path, output_copy)
+print(f"PyVis generado: {pyvis_path.resolve()}")
+```
+
+```{python}
+#| label: pyvis-iframe
+#| echo: false
+
+from IPython.display import display, HTML
+
+html = '<iframe class="network-frame" src="coocurrence_pyvis.html" style="height:650px;width:100%;border:1px solid #ccc;border-radius:4px;"></iframe>'
+display(HTML(html))
+```
+
+::: {.callout-tip}
+En el grafo PyVis puedes hacer zoom con la rueda del ratón, arrastrar nodos y hacer clic
+en ellos para ver sus conexiones. Los colores corresponden a las comunidades Louvain.
+:::

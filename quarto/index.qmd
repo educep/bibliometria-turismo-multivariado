@@ -1,0 +1,173 @@
+---
+title: "Análisis Bibliométrico Multivariado en Turismo"
+subtitle: "Estructura y evolución de las técnicas estadísticas multivariadas en 331 artículos WoS"
+---
+
+## Presentación
+
+Este sitio presenta los resultados de un análisis bibliométrico de **331 artículos** indexados
+en Web of Science que aplican técnicas estadísticas multivariadas a la investigación turística.
+
+El objetivo es responder la pregunta:
+
+> **¿Cómo se estructura el uso de técnicas estadísticas multivariadas en la investigación
+> turística, y cómo ha evolucionado esa estructura?**
+
+El enfoque combina análisis de co-ocurrencia de keywords, detección de comunidades temáticas,
+métricas de centralidad y reducción dimensional para revelar la arquitectura intelectual del campo.
+
+---
+
+## Estadísticas del corpus
+
+```{python}
+#| label: load-summary
+#| echo: true
+
+import pandas as pd
+from pathlib import Path
+
+OUTPUT = Path("../output")
+
+cent = pd.read_csv(OUTPUT / "centralities.csv")
+comm = pd.read_csv(OUTPUT / "communities_labeled.csv")
+
+n_nodes = len(cent)
+n_communities = len(comm)
+n_articles = 331
+
+# Edges: approximate from degree sum / 2 (each edge counted twice)
+# Use weighted_degree as proxy for edge count info
+top_kw = cent.nlargest(5, "frequency")[["keyword", "frequency"]].reset_index(drop=True)
+
+print(f"Artículos analizados : {n_articles}")
+print(f"Keywords únicas      : {n_nodes}")
+print(f"Comunidades          : {n_communities}")
+print(f"Top keyword          : {cent.iloc[0]['keyword']} (freq={int(cent.iloc[0]['frequency'])})")
+```
+
+::: {.columns}
+
+::: {.column width="25%"}
+<div class="text-center">
+  <div class="stat-badge">331</div>
+  <div>Artículos WoS</div>
+</div>
+:::
+
+::: {.column width="25%"}
+<div class="text-center">
+  <div class="stat-badge" id="n-nodes">--</div>
+  <div>Keywords únicas</div>
+</div>
+:::
+
+::: {.column width="25%"}
+<div class="text-center">
+  <div class="stat-badge" id="n-comm">--</div>
+  <div>Comunidades</div>
+</div>
+:::
+
+::: {.column width="25%"}
+<div class="text-center">
+  <div class="stat-badge">5</div>
+  <div>Ventanas temporales</div>
+</div>
+:::
+
+:::
+
+```{python}
+#| label: stats-inline
+#| echo: false
+
+from IPython.display import display, HTML
+
+html = f"""
+<script>
+document.getElementById('n-nodes').textContent = '{n_nodes}';
+document.getElementById('n-comm').textContent  = '{n_communities}';
+</script>
+"""
+display(HTML(html))
+```
+
+---
+
+## Top 10 keywords por frecuencia
+
+```{python}
+#| label: top-keywords-bar
+#| fig-cap: "Keywords más frecuentes en el corpus bibliométrico"
+
+import plotly.express as px
+
+top10 = cent.nlargest(10, "frequency")[["keyword", "frequency", "community"]].copy()
+top10["community"] = top10["community"].astype(str)
+
+fig = px.bar(
+    top10,
+    x="frequency",
+    y="keyword",
+    orientation="h",
+    color="community",
+    text="frequency",
+    title="Top 10 keywords por frecuencia de aparición",
+    labels={"frequency": "Frecuencia", "keyword": "Keyword", "community": "Comunidad"},
+    height=420,
+)
+fig.update_layout(yaxis={"categoryorder": "total ascending"}, showlegend=False)
+fig.update_traces(textposition="outside")
+fig.show()
+```
+
+---
+
+## Navegación
+
+::: {.grid}
+
+::: {.g-col-6}
+::: {.card .p-3}
+### [Datos del corpus](01_datos.qmd)
+Distribución temporal, revistas, cobertura de keywords.
+:::
+:::
+
+::: {.g-col-6}
+::: {.card .p-3}
+### [Red de co-ocurrencia](02_coocurrencia.qmd)
+Grafo interactivo de keywords co-ocurrentes en los artículos.
+:::
+:::
+
+::: {.g-col-6}
+::: {.card .p-3}
+### [Comunidades temáticas](03_comunidades.qmd)
+Subcampos metodológicos y temáticos detectados con Louvain.
+:::
+:::
+
+::: {.g-col-6}
+::: {.card .p-3}
+### [Centralidades](04_centralidades.qmd)
+Keywords pilar y keywords puente entre subcampos.
+:::
+:::
+
+::: {.g-col-6}
+::: {.card .p-3}
+### [Reducción dimensional](05_reduccion_dim.qmd)
+MDS, t-SNE, UMAP y análisis de correspondencias.
+:::
+:::
+
+::: {.g-col-6}
+::: {.card .p-3}
+### [Evolución temporal](06_evolucion.qmd)
+Técnicas emergentes y en declive por período.
+:::
+:::
+
+:::

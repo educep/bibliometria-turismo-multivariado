@@ -1,0 +1,35 @@
+---
+type: author
+n_articles: 1
+n_coauthors: 2
+tags:
+  - author
+---
+
+# Shaparov, AE
+
+## Coautores
+
+- [[Myakshin, VN]]
+- [[Tikhanova, DV]]
+
+## Keywords
+
+- [[arctic tourism]]
+- [[balanced assessment]]
+- [[balanced scorecard]]
+- [[key indicators]]
+- [[target values of indicators]]
+- [[territories of the russian arctic]]
+- [[tourism cluster]]
+- [[tourism infrastructure]]
+- [[tourism potential]]
+- [[tourist destinations]]
+
+## Publica en
+
+- [[EKONOMIKA REGIONA-ECONOMY OF REGION]]
+
+## Articulos
+
+- Improving the Assessment of the Tourism Potential of the Russian Arctic (2021)

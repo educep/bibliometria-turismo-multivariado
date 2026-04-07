@@ -1,0 +1,30 @@
+---
+type: author
+n_articles: 1
+n_coauthors: 3
+tags:
+  - author
+---
+
+# De Iaco, S
+
+## Coautores
+
+- [[Cappello, C]]
+- [[Distefano, V]]
+- [[Palma, M]]
+
+## Keywords
+
+- [[bandwidth]]
+- [[composite indicator]]
+- [[multivariate analysis]]
+- [[variogram range]]
+
+## Publica en
+
+- [[ANNALS OF OPERATIONS RESEARCH]]
+
+## Articulos
+
+- Tourism composite spatial indicators through variography and geographically weighted principal components analysis (2024)

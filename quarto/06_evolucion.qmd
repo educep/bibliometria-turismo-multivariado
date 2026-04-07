@@ -1,0 +1,223 @@
+---
+title: "Evolución temporal de las técnicas"
+---
+
+La evolución temporal revela qué técnicas han ganado protagonismo y cuáles han perdido
+relevancia a lo largo del tiempo. El corpus cubre publicaciones desde los años 2000 hasta
+2023, lo que permite identificar tendencias claras en el uso de métodos multivariados en
+la investigación turística.
+
+## Carga de datos
+
+```{python}
+#| label: load-evolution
+
+import pandas as pd
+from pathlib import Path
+
+OUTPUT = Path("../output")
+
+evo = pd.read_csv(OUTPUT / "keyword_evolution.csv")
+
+print(f"Registros cargados : {len(evo)}")
+print(f"Períodos disponibles: {sorted(evo['period'].unique())}")
+print(f"Columnas           : {list(evo.columns)}")
+```
+
+## Frecuencia de keywords por período
+
+```{python}
+#| label: evolution-lineplot
+#| fig-cap: "Evolución de la frecuencia de keywords clave por período temporal"
+
+import plotly.express as px
+
+# Select top keywords by total frequency across all periods
+top_kws = (
+    evo.groupby("keyword")["frequency"]
+    .sum()
+    .nlargest(20)
+    .index.tolist()
+)
+
+evo_top = evo[evo["keyword"].isin(top_kws)].copy()
+
+fig = px.line(
+    evo_top,
+    x="period",
+    y="frequency",
+    color="keyword",
+    markers=True,
+    title="Evolución temporal — Top 20 keywords por frecuencia total",
+    labels={"period": "Período", "frequency": "Frecuencia", "keyword": "Keyword"},
+    height=560,
+)
+fig.update_layout(legend={"title": "Keyword", "font": {"size": 10}})
+fig.show()
+```
+
+## Evolución de técnicas multivariadas clave
+
+```{python}
+#| label: techniques-evolution
+#| fig-cap: "Evolución de técnicas multivariadas seleccionadas"
+
+tecnicas = [
+    "structural equation modeling",
+    "cluster analysis",
+    "multivariate analysis",
+    "principal component analysis",
+    "multiple regression",
+    "data envelopment analysis",
+    "partial least squares",
+    "correspondence analysis",
+    "discriminant analysis",
+]
+
+evo_tec = evo[evo["keyword"].isin(tecnicas)].copy()
+
+if len(evo_tec) > 0:
+    fig2 = px.line(
+        evo_tec,
+        x="period",
+        y="frequency",
+        color="keyword",
+        markers=True,
+        title="Evolución de técnicas multivariadas en la investigación turística",
+        labels={"period": "Período", "frequency": "Frecuencia", "keyword": "Técnica"},
+        height=520,
+    )
+    fig2.update_layout(legend={"title": "Técnica"})
+    fig2.show()
+else:
+    print("No se encontraron las técnicas seleccionadas en el archivo de evolución.")
+    print("Keywords disponibles (muestra):", evo["keyword"].unique()[:20].tolist())
+```
+
+## Detección de emergentes y en declive
+
+```{python}
+#| label: emerging-declining
+
+from co_occurrence.io.loader import load_wos_data
+from co_occurrence.config import DATA_FILE
+from co_occurrence.analysis.temporal import build_temporal_graphs, detect_emerging_declining
+
+df = load_wos_data(DATA_FILE)
+
+temporal_graphs = build_temporal_graphs(
+    df,
+    column="Author Keywords",
+    window_years=5,
+    min_weight=1,
+)
+
+print(f"Períodos construidos: {sorted(temporal_graphs.keys())}")
+
+emerging, declining = detect_emerging_declining(temporal_graphs, n_early=2)
+
+print(f"\nKeywords emergentes ({len(emerging)}):")
+for kw in sorted(emerging)[:20]:
+    print(f"  + {kw}")
+
+print(f"\nKeywords en declive ({len(declining)}):")
+for kw in sorted(declining)[:20]:
+    print(f"  - {kw}")
+```
+
+## Visualización de emergentes vs en declive
+
+```{python}
+#| label: emerging-bar
+#| fig-cap: "Keywords emergentes y en declive en el corpus"
+
+import plotly.graph_objects as go
+import pandas as pd
+
+# Get frequency in last period for emerging
+last_period = sorted(temporal_graphs.keys())[-1]
+last_G = temporal_graphs[last_period]
+
+emerging_freq = []
+for kw in emerging:
+    if kw in last_G.nodes():
+        emerging_freq.append({
+            "keyword": kw,
+            "frequency": last_G.nodes[kw].get("frequency", 1),
+            "type": "Emergente",
+        })
+
+# Get frequency in first periods for declining
+first_periods = sorted(temporal_graphs.keys())[:2]
+declining_freq = {}
+for period in first_periods:
+    G_period = temporal_graphs[period]
+    for kw in declining:
+        if kw in G_period.nodes():
+            freq = G_period.nodes[kw].get("frequency", 1)
+            declining_freq[kw] = declining_freq.get(kw, 0) + freq
+
+for kw, freq in declining_freq.items():
+    emerging_freq.append({"keyword": kw, "frequency": freq, "type": "En declive"})
+
+if emerging_freq:
+    dyn_df = pd.DataFrame(emerging_freq)
+    top_emerging = dyn_df[dyn_df["type"] == "Emergente"].nlargest(15, "frequency")
+    top_declining = dyn_df[dyn_df["type"] == "En declive"].nlargest(15, "frequency")
+    plot_df = pd.concat([top_emerging, top_declining])
+
+    fig3 = px.bar(
+        plot_df,
+        x="frequency",
+        y="keyword",
+        color="type",
+        orientation="h",
+        facet_col="type",
+        title="Keywords emergentes y en declive (top 15 de cada grupo)",
+        labels={"frequency": "Frecuencia", "keyword": "", "type": "Tipo"},
+        height=520,
+        color_discrete_map={"Emergente": "#2ca02c", "En declive": "#d62728"},
+    )
+    fig3.update_layout(showlegend=False)
+    fig3.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig3.show()
+```
+
+## Tabla de keywords emergentes
+
+```{python}
+#| label: emerging-table
+
+import pandas as pd
+
+emerging_rows = []
+for kw in sorted(emerging):
+    freq_last = last_G.nodes[kw].get("frequency", 1) if kw in last_G.nodes() else 0
+    emerging_rows.append({"Keyword": kw, "Freq_último_período": freq_last})
+
+if emerging_rows:
+    emerging_table = pd.DataFrame(emerging_rows).sort_values(
+        "Freq_último_período", ascending=False
+    )
+    try:
+        from itables import show
+        show(
+            emerging_table,
+            caption=f"Keywords emergentes (aparecen en {last_period} pero no en los 2 primeros períodos)",
+            lengthMenu=[10, 25],
+        )
+    except ImportError:
+        display(emerging_table.head(20))
+else:
+    print("No se detectaron keywords emergentes.")
+```
+
+::: {.callout-note title="Tendencias observadas"}
+- **SEM/PLS** ha dominado el corpus desde aproximadamente 2010, reflejando la adopción
+  masiva de modelos de ecuaciones estructurales en marketing turístico.
+- **Machine learning, big data y análisis de redes sociales** emergen con fuerza post-2018.
+- **DEA** (Data Envelopment Analysis) mantiene una presencia estable, concentrada en estudios
+  de eficiencia hotelera y de destinos.
+- El impacto de **COVID-19** en 2020-2021 generó un pico de keywords como "resilience",
+  "behavioral intention" y "medical tourism".
+:::

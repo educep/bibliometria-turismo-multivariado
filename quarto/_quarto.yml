@@ -1,0 +1,55 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+  resources:
+    - "coocurrence_pyvis.html"
+
+website:
+  title: "Análisis Bibliométrico Multivariado — Turismo"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Inicio
+      - href: 01_datos.qmd
+        text: Datos
+      - text: Grafos
+        menu:
+          - href: 02_coocurrencia.qmd
+            text: Co‑ocurrencia
+      - text: Análisis
+        menu:
+          - href: 03_comunidades.qmd
+            text: Comunidades
+          - href: 04_centralidades.qmd
+            text: Centralidades
+          - href: 05_reduccion_dim.qmd
+            text: Reducción dimensional
+          - href: 06_evolucion.qmd
+            text: Evolución temporal
+      - href: about.qmd
+        text: Acerca de
+    right:
+      - icon: github
+        href: https://github.com/cepedaio
+  page-footer:
+    center: "2026 Eduardo Cepeda, Ph.D."
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-tools: true
+    code-summary: "Ver código"
+    self-contained: false
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false

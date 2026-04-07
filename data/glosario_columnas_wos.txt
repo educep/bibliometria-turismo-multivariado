@@ -1,0 +1,117 @@
+GLOSARIO DE COLUMNAS — Web of Science Export (331 artículos)
+=============================================================
+Fuente: "anal multiv 331 artic completo.xlsx", hoja "savedrecs"
+Fecha: 2025-03-23 (fecha de exportación WoS)
+
+METADATOS DE PUBLICACIÓN
+  Publication Type        Tipo de publicación (J=Journal, B=Book, S=Series, P=Patent)
+  Document Type           Clasificación documental (Article, Review, Letter, etc.)
+  Language                Idioma del documento
+  Publication Date        Fecha de publicación (texto, ej. "JUL")
+  Publication Year        Año de publicación (numérico)
+  Early Access Date       Fecha de acceso anticipado online (pre-print)
+  Date of Export          Fecha en que se exportó el registro desde WoS
+
+AUTORÍA
+  Authors                 Autores abreviados (Apellido, Iniciales; separados por ";")
+  Author Full Names       Nombres completos de los autores
+  Book Authors            Autores del libro (si aplica)
+  Book Author Full Names  Nombres completos de autores del libro
+  Book Editors            Editores del libro
+  Book Group Authors      Autores grupales del libro
+  Group Authors           Autores grupales del artículo
+  Researcher Ids          Identificadores de investigador (ResearcherID/Publons)
+  ORCIDs                  Identificadores ORCID de los autores
+
+TÍTULO Y FUENTE
+  Article Title           Título del artículo
+  Source Title            Nombre de la revista o fuente
+  Book Series Title       Título de la serie de libros
+  Book Series Subtitle    Subtítulo de la serie de libros
+  Journal Abbreviation    Abreviatura de la revista (formato WoS)
+  Journal ISO Abbreviation Abreviatura ISO de la revista
+
+AFILIACIÓN Y CONTACTO
+  Addresses               Direcciones institucionales de todos los autores
+  Affiliations            Instituciones afiliadas (nivel organizacional)
+  Reprint Addresses       Dirección del autor de correspondencia
+  Email Addresses         Email(s) del autor de correspondencia
+
+CONTENIDO TEMÁTICO
+  Author Keywords         Palabras clave asignadas por los autores
+  Keywords Plus           Palabras clave generadas automáticamente por WoS (del título de refs citadas)
+  Abstract                Resumen del artículo
+  WoS Categories          Categorías temáticas WoS (ej. "Hospitality, Leisure, Sport & Tourism")
+  Research Areas           Áreas de investigación WoS (agrupación más amplia)
+
+CONFERENCIA (si aplica)
+  Conference Title        Nombre de la conferencia
+  Conference Date         Fecha de la conferencia
+  Conference Location     Lugar de la conferencia
+  Conference Sponsor      Patrocinador
+  Conference Host         Organizador/anfitrión
+
+FINANCIAMIENTO
+  Funding Orgs            Organizaciones financiadoras
+  Funding Name Preferred  Nombre preferido de la fuente de financiamiento
+  Funding Text            Texto completo de agradecimiento de financiamiento
+
+CITACIÓN E IMPACTO
+  Cited References        Lista de referencias citadas en el artículo
+  Cited Reference Count   Número de referencias citadas
+  Times Cited, WoS Core   Veces citado en WoS Core Collection
+  Times Cited, All Databases  Veces citado en todas las bases WoS
+  180 Day Usage Count     Descargas/visualizaciones en últimos 180 días
+  Since 2013 Usage Count  Descargas/visualizaciones acumuladas desde 2013
+  Highly Cited Status     Si es artículo altamente citado (top 1% de su campo/año)
+  Hot Paper Status        Si es "hot paper" (top 0.1% en últimos 2 años)
+
+DATOS EDITORIALES
+  Publisher               Editorial
+  Publisher City          Ciudad de la editorial
+  Publisher Address       Dirección completa de la editorial
+  ISSN                    ISSN impreso
+  eISSN                   ISSN electrónico
+  ISBN                    ISBN (si aplica)
+  Volume                  Volumen
+  Issue                   Número
+  Part Number             Número de parte
+  Supplement              Suplemento
+  Special Issue           Número especial
+  Meeting Abstract        Resumen de reunión/conferencia
+  Start Page              Página de inicio
+  End Page                Página final
+  Article Number          Número de artículo (revistas sin paginación)
+  Number of Pages         Número de páginas
+  DOI                     Digital Object Identifier
+  DOI Link                URL del DOI
+  Book DOI                DOI del libro
+
+INDEXACIÓN WoS
+  Web of Science Index    Índice WoS (SCI, SSCI, A&HCI, ESCI, etc.)
+  IDS Number              Número de identificación del documento en WoS
+  Pubmed Id               Identificador PubMed (si aplica)
+  Open Access Designations  Tipo de acceso abierto (Gold, Green, Bronze, etc.)
+  UT (Unique WOS ID)      Identificador único del registro en WoS
+  Web of Science Record   Link al registro completo en WoS
+
+COLUMNAS RELEVANTES PARA GRAFOS
+  ─────────────────────────────
+  NODOS potenciales:
+    Authors / Author Full Names  → nodos de autor
+    Source Title                 → nodos de revista
+    Author Keywords              → nodos de keyword (controladas)
+    Keywords Plus                → nodos de keyword (automáticas)
+    WoS Categories               → nodos de categoría temática
+    Affiliations                 → nodos de institución
+    Publication Year             → nodos o atributo temporal
+    Funding Orgs                 → nodos de financiador
+
+  ARISTAS potenciales:
+    Coautoría                    → autor–autor (misma fila)
+    Co-ocurrencia de keywords    → keyword–keyword (misma fila)
+    Autor–keyword                → bipartito
+    Autor–revista                → bipartito
+    Autor–institución            → bipartito
+    Cited References             → red de citación (requiere parseo)
+    Co-citación                  → ref–ref citadas juntas
