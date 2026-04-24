@@ -83,3 +83,17 @@ deploy.sh
 BITACORA.md
 **/preliminar/
 docs/nice_to_do/
+
+# Estudio PubMed (corpus paralelo, no forma parte del proyecto principal)
+publicacion/
+quarto_pubmed/
+vault_pubmed/
+scripts/
+EMAIL_ENVIO.md
+CAMBIOS_RESUMEN.md
+src/co_occurrence/config_pubmed.py
+src/co_occurrence/synonyms_neuro.py
+src/co_occurrence/obsidian_pubmed.py
+src/co_occurrence/io/pubmed_loader.py
+src/co_occurrence/analysis/productivity.py
+src/co_occurrence/viz/productivity_plots.py
